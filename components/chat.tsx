@@ -116,21 +116,24 @@ export function Chat({
   return (
     <>
       <div className="flex flex-col min-w-0 h-dvh bg-background relative">
-        {/* Animação de fundo com texto "Lumen" */}
-        <div className="absolute inset-0 w-full h-full pointer-events-none z-0">
+        {/* Animação de fundo com texto "Lumen" - sem pointer-events-none */}
+        <div className="absolute inset-0 w-full h-full z-0">
           <TextParticle
             text="Lumen"
             fontSize={300}
-            particleColor="#223f66"  /* Cor principal SolutoMIND */
+            particleColor="#223f66"
             particleSize={1.5}
             particleDensity={6}
             backgroundColor="transparent"
-            className="opacity-10"
+            className="opacity-15"
           />
         </div>
 
+        {/* Camada transparente para garantir cliques no conteúdo principal */}
+        <div className="absolute inset-0 z-5 pointer-events-none"></div>
+
         {/* Conteúdo principal do chat com z-index aumentado */}
-        <div className="relative z-10 flex flex-col min-w-0 h-full">
+        <div className="relative z-20 flex flex-col min-w-0 h-full">
           <ChatHeader
             chatId={id}
             selectedModelId={initialChatModel}

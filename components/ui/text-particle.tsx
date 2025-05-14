@@ -11,6 +11,7 @@ interface Particle {
   baseY: number
   density: number
   color: string
+  originalColor: string
 }
 
 interface TextParticleAnimationProps {
@@ -91,6 +92,7 @@ export function TextParticle({
               baseY: y,
               density: Math.random() * 30 + 1,
               color: particleColor,
+              originalColor: particleColor
             })
           }
         }
@@ -121,8 +123,32 @@ export function TextParticle({
     const ctx = canvas.getContext("2d")
     if (!ctx) return
 
+    // Função para rastrear posição do mouse no documento inteiro
+    const handleDocumentMouseMove = (e: MouseEvent) => {
+      const rect = canvas.getBoundingClientRect()
+      if (
+        e.clientX >= rect.left &&
+        e.clientX <= rect.right &&
+        e.clientY >= rect.top &&
+        e.clientY <= rect.bottom
+      ) {
+        setMouse({
+          x: e.clientX - rect.left,
+          y: e.clientY - rect.top,
+        })
+      } else {
+        // Mouse fora do canvas
+        setMouse({ x: null, y: null })
+      }
+    }
+
+    // Adicionar ouvinte de eventos ao documento
+    document.addEventListener('mousemove', handleDocumentMouseMove)
+
     const animate = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height)
+      // Efeito de rastro suave
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.05)'
+      ctx.fillRect(0, 0, canvas.width, canvas.height)
 
       if (backgroundColor !== "transparent") {
         ctx.fillStyle = backgroundColor
@@ -142,10 +168,20 @@ export function TextParticle({
           dy = mouse.y - particle.y
           distance = Math.sqrt(dx * dx + dy * dy)
 
-          if (distance < 100) {
-            forceDirectionX = (dx / distance) * 3
-            forceDirectionY = (dy / distance) * 3
+          // Aumentar raio e força da interação
+          if (distance < 150) {
+            forceDirectionX = (dx / distance) * 6
+            forceDirectionY = (dy / distance) * 6
+            
+            // Mudar cor das partículas próximas ao mouse - efeito de brilho
+            // Extrair componentes de cor do azul SolutoMIND e aumentar luminosidade
+            const highlightColor = `rgba(70, 130, 210, ${1 - (distance / 150)})`
+            particle.color = highlightColor
+          } else {
+            particle.color = particle.originalColor
           }
+        } else {
+          particle.color = particle.originalColor
         }
 
         // Apply force and calculate new position
@@ -168,34 +204,17 @@ export function TextParticle({
     animate()
 
     return () => {
+      document.removeEventListener('mousemove', handleDocumentMouseMove)
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current)
       }
     }
-  }, [particles, mouse, backgroundColor])
-
-  // Mouse interaction
-  const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    const canvas = canvasRef.current
-    if (!canvas) return
-
-    const rect = canvas.getBoundingClientRect()
-    setMouse({
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top,
-    })
-  }
-
-  const handleMouseLeave = () => {
-    setMouse({ x: null, y: null })
-  }
+  }, [particles, mouse, backgroundColor, particleColor])
 
   return (
     <canvas
       ref={canvasRef}
       className={`w-full h-full ${className}`}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
     />
   )
 }
