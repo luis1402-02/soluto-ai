@@ -1,4 +1,4 @@
-"" 'use client';
+'use client';
 
 import type { Attachment, UIMessage } from 'ai';
 import { useChat } from '@ai-sdk/react';
