@@ -2,6 +2,7 @@
 
 import type { User } from 'next-auth';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image'; // Adicione esta importação
 
 import { PlusIcon } from '@/components/icons';
 import { SidebarHistory } from '@/components/sidebar-history';
@@ -34,9 +35,14 @@ export function AppSidebar({ user }: { user: User | undefined }) {
               }}
               className="flex flex-row gap-3 items-center"
             >
-              <span className="text-lg font-semibold px-2 hover:bg-muted rounded-md cursor-pointer">
-                SolutoMIND
-              </span>
+              {/* Substitua esta parte */}
+              <Image
+                src="/images/soluto-logo.png"
+                alt="Logo SolutoMIND"
+                width={150}
+                height={45}
+                className="px-2 hover:bg-muted rounded-md cursor-pointer"
+              />
             </Link>
             <Tooltip>
               <TooltipTrigger asChild>
