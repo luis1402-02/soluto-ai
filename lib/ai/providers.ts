@@ -23,9 +23,9 @@ export const myProvider = isTestEnvironment
     })
   : customProvider({
       languageModels: {
-        'chat-model': openai('gpt-4.1'),
+        'chat-model': openai('gpt-4.1-2025-04-14'),
         'chat-model-reasoning': wrapLanguageModel({
-          model: openai('gpt-4.1', {
+          model: openai('gpt-4.1-2025-04-14', {
             temperature: 0.3,
           }),
           middleware: extractReasoningMiddleware({
@@ -34,8 +34,8 @@ export const myProvider = isTestEnvironment
             separator: '\n\n',
           }),
         }),
-        'title-model': openai('gpt-4.1-mini'),
-        'artifact-model': openai('gpt-4.1'),
+        'title-model': openai('gpt-4.1-mini-2025-04-14'),
+        'artifact-model': openai('gpt-4.1-2025-04-14'),
       },
       imageModels: {
         'small-model': openai.image('gpt-image-1'),
