@@ -68,6 +68,7 @@ export function Chat({
       selectedChatModel: initialChatModel,
       selectedVisibilityType: visibilityType,
     }),
+    experimental_streamReasoning: initialChatModel === 'chat-model-reasoning',
     onFinish: () => {
       mutate(unstable_serialize(getChatHistoryPaginationKey));
     },

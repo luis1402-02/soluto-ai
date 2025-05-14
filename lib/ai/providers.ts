@@ -26,9 +26,10 @@ export const myProvider = isTestEnvironment
         'chat-model': openai('gpt-4.1-2025-04-14'),
         'chat-model-reasoning': wrapLanguageModel({
           model: openai('gpt-4.1-2025-04-14'), // Use um modelo compatível 
-          middleware: extractReasoningMiddleware({ 
+          middleware: extractReasoningMiddleware({
             tagName: 'think',
-            startWithReasoning: false // Ajustado para compatibilidade
+            startWithReasoning: true,
+            recordIntermediateReasoning: true
           }),
         }),
         'title-model': openai('gpt-4.1-mini-2025-04-14'),
