@@ -13,7 +13,7 @@ export const Greeting = () => {
         transition={{ delay: 0.5 }}
         className="text-2xl font-semibold"
       >
-        Olá!
+        Olá, sou a Lumem!
       </motion.div>
       <motion.div
         initial={{ opacity: 0, y: 10 }}
@@ -22,7 +22,7 @@ export const Greeting = () => {
         transition={{ delay: 0.6 }}
         className="text-2xl text-zinc-500"
       >
-        Como posso te ajudar hoje?
+        Estou aqui para iluminar seus caminhos e estratégias, como posso te ajudar?
       </motion.div>
     </div>
   );
