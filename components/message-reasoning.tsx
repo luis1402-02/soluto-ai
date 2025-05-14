@@ -16,8 +16,6 @@ export function MessageReasoning({
 }: MessageReasoningProps) {
   const [isExpanded, setIsExpanded] = useState(true);
 
-  const reasoningContent = reasoning || '';
-
   const variants = {
     collapsed: {
       height: 0,
@@ -37,14 +35,14 @@ export function MessageReasoning({
     <div className="flex flex-col">
       {isLoading ? (
         <div className="flex flex-row gap-2 items-center">
-          <div className="font-medium">Raciocínando..</div>
+          <div className="font-medium">Pensando..</div>
           <div className="animate-spin">
             <LoaderIcon />
           </div>
         </div>
       ) : (
         <div className="flex flex-row gap-2 items-center">
-          <div className="font-medium">Pensou por alguns segundos.</div>
+          <div className="font-medium">Pensou por alguns segundos</div>
           <button
             data-testid="message-reasoning-toggle"
             type="button"
@@ -71,10 +69,10 @@ export function MessageReasoning({
             style={{ overflow: 'hidden' }}
             className="pl-4 text-zinc-600 dark:text-zinc-400 border-l flex flex-col gap-4"
           >
-            <Markdown>{reasoningContent}</Markdown>
+            <Markdown>{reasoning}</Markdown>
           </motion.div>
         )}
       </AnimatePresence>
     </div>
   );
-} 
+}
