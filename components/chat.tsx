@@ -19,6 +19,7 @@ import type { Session } from 'next-auth';
 import { useSearchParams } from 'next/navigation';
 import { useChatVisibility } from '@/hooks/use-chat-visibility';
 import { useAutoResume } from '@/hooks/use-auto-resume';
+import { TextParticle } from '@/components/ui/text-particle';
 
 export function Chat({
   id,
@@ -114,44 +115,60 @@ export function Chat({
 
   return (
     <>
-      <div className="flex flex-col min-w-0 h-dvh bg-background">
-        <ChatHeader
-          chatId={id}
-          selectedModelId={initialChatModel}
-          selectedVisibilityType={initialVisibilityType}
-          isReadonly={isReadonly}
-          session={session}
-        />
+      <div className="flex flex-col min-w-0 h-dvh bg-background relative">
+        {/* Animação de fundo com texto "Lumen" */}
+        <div className="absolute inset-0 w-full h-full pointer-events-none z-0">
+          <TextParticle
+            text="Lumen"
+            fontSize={300}
+            particleColor="#223f66"  /* Cor principal SolutoMIND */
+            particleSize={1.5}
+            particleDensity={6}
+            backgroundColor="transparent"
+            className="opacity-10"
+          />
+        </div>
 
-        <Messages
-          chatId={id}
-          status={status}
-          votes={votes}
-          messages={messages}
-          setMessages={setMessages}
-          reload={reload}
-          isReadonly={isReadonly}
-          isArtifactVisible={isArtifactVisible}
-        />
+        {/* Conteúdo principal do chat com z-index aumentado */}
+        <div className="relative z-10 flex flex-col min-w-0 h-full">
+          <ChatHeader
+            chatId={id}
+            selectedModelId={initialChatModel}
+            selectedVisibilityType={initialVisibilityType}
+            isReadonly={isReadonly}
+            session={session}
+          />
 
-        <form className="flex mx-auto px-4 bg-background pb-4 md:pb-6 gap-2 w-full md:max-w-3xl">
-          {!isReadonly && (
-            <MultimodalInput
-              chatId={id}
-              input={input}
-              setInput={setInput}
-              handleSubmit={handleSubmit}
-              status={status}
-              stop={stop}
-              attachments={attachments}
-              setAttachments={setAttachments}
-              messages={messages}
-              setMessages={setMessages}
-              append={append}
-              selectedVisibilityType={visibilityType}
-            />
-          )}
-        </form>
+          <Messages
+            chatId={id}
+            status={status}
+            votes={votes}
+            messages={messages}
+            setMessages={setMessages}
+            reload={reload}
+            isReadonly={isReadonly}
+            isArtifactVisible={isArtifactVisible}
+          />
+
+          <form className="flex mx-auto px-4 bg-background/80 backdrop-blur-sm pb-4 md:pb-6 gap-2 w-full md:max-w-3xl">
+            {!isReadonly && (
+              <MultimodalInput
+                chatId={id}
+                input={input}
+                setInput={setInput}
+                handleSubmit={handleSubmit}
+                status={status}
+                stop={stop}
+                attachments={attachments}
+                setAttachments={setAttachments}
+                messages={messages}
+                setMessages={setMessages}
+                append={append}
+                selectedVisibilityType={visibilityType}
+              />
+            )}
+          </form>
+        </div>
       </div>
 
       <Artifact
