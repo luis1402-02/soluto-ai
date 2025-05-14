@@ -17,28 +17,28 @@ function PureSuggestedActions({
   append,
   selectedVisibilityType,
 }: SuggestedActionsProps) {
-  const suggestedActions = [
-    {
-      title: 'What are the advantages',
-      label: 'of using Next.js?',
-      action: 'What are the advantages of using Next.js?',
-    },
-    {
-      title: 'Write code to',
-      label: `demonstrate djikstra's algorithm`,
-      action: `Write code to demonstrate djikstra's algorithm`,
-    },
-    {
-      title: 'Help me write an essay',
-      label: `about silicon valley`,
-      action: `Help me write an essay about silicon valley`,
-    },
-    {
-      title: 'What is the weather',
-      label: 'in San Francisco?',
-      action: 'What is the weather in San Francisco?',
-    },
-  ];
+const suggestedActions = [
+  {
+    title: 'Como usar IA para',
+    label: 'análise de legislação regulatória',
+    action: 'Como usar inteligência artificial para otimizar a análise de legislação regulatória recente da ANVISA?',
+  },
+  {
+    title: 'Gere um modelo de',
+    label: 'relatório técnico para submissão regulatória',
+    action: 'Gere um modelo de relatório técnico para submissão regulatória de dispositivos médicos junto à ANVISA',
+  },
+  {
+    title: 'Resuma as principais',
+    label: 'mudanças regulatórias do último trimestre',
+    action: 'Resuma as principais mudanças regulatórias da ANVISA no setor de dispositivos médicos do último trimestre',
+  },
+  {
+    title: 'Como estruturar',
+    label: 'uma estratégia regulatória ágil',
+    action: 'Como estruturar uma estratégia regulatória ágil para aceleração da entrada de produtos inovadores no mercado brasileiro?',
+  },
+];
 
   return (
     <div

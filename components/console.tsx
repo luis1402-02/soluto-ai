@@ -139,7 +139,7 @@ export function Console({ consoleOutputs, setConsoleOutputs }: ConsoleProps) {
                   </div>
                   <div className="text-muted-foreground">
                     {consoleOutput.status === 'in_progress'
-                      ? 'Initializing...'
+                      ? 'Iniciando...'
                       : consoleOutput.status === 'loading_packages'
                         ? consoleOutput.contents.map((content) =>
                             content.type === 'text' ? content.value : null,

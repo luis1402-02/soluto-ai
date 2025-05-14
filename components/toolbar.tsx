@@ -143,12 +143,12 @@ const ReadingLevelSelector = ({
   append: UseChatHelpers['append'];
 }) => {
   const LEVELS = [
-    'Elementary',
-    'Middle School',
-    'Keep current level',
-    'High School',
-    'College',
-    'Graduate',
+    'Berçário',
+    'Fundamental 2',
+    'Manter o nível atual',
+    'Colegial',
+    'Universidade',
+    'PhD',
   ];
 
   const y = useMotionValue(-40 * 2);

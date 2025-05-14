@@ -265,7 +265,7 @@ function PureMultimodalInput({
       <Textarea
         data-testid="multimodal-input"
         ref={textareaRef}
-        placeholder="Send a message..."
+        placeholder="Envie sua mensagem..."
         value={input}
         onChange={handleInput}
         className={cx(
@@ -283,7 +283,7 @@ function PureMultimodalInput({
             event.preventDefault();
 
             if (status !== 'ready') {
-              toast.error('Please wait for the model to finish its response!');
+              toast.error('Por favor, espere a IA terminar a resposta!');
             } else {
               submitForm();
             }

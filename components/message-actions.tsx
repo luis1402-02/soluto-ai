@@ -49,12 +49,12 @@ export function PureMessageActions({
                   .trim();
 
                 if (!textFromParts) {
-                  toast.error("There's no text to copy!");
+                  toast.error("Não tem nada para copiar!");
                   return;
                 }
 
                 await copyToClipboard(textFromParts);
-                toast.success('Copied to clipboard!');
+                toast.success('Copiado com sucesso!');
               }}
             >
               <CopyIcon />
