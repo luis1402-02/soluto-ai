@@ -226,16 +226,7 @@ export async function POST(request: Request) {
       onError: () => {
         return 'Oops, an error occurred!';
       },
-    });  result.mergeIntoDataStream(dataStream, {
-    sendReasoning: true,
-    sendIntermediateReasoning: true,
-    transformReasoningMessage: (content) => {
-      return {
-        type: 'reasoning',
-        reasoning: content
-      };
-    }
-  })
+    }); 
 
     const streamContext = getStreamContext();
 
