@@ -221,7 +221,6 @@ export async function POST(request: Request) {
 
         result.mergeIntoDataStream(dataStream, {
           sendReasoning: true,
-          sendIntermediateReasoning: true,
           transformReasoningMessage: (content) => {
             return {
               type: 'reasoning',

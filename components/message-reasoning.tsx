@@ -16,6 +16,8 @@ export function MessageReasoning({
 }: MessageReasoningProps) {
   const [isExpanded, setIsExpanded] = useState(true);
 
+  const reasoningContent = reasoning || '';
+
   const variants = {
     collapsed: {
       height: 0,
@@ -69,10 +71,10 @@ export function MessageReasoning({
             style={{ overflow: 'hidden' }}
             className="pl-4 text-zinc-600 dark:text-zinc-400 border-l flex flex-col gap-4"
           >
-            <Markdown>{reasoning}</Markdown>
+            <Markdown>{reasoningContent}</Markdown>
           </motion.div>
         )}
       </AnimatePresence>
     </div>
   );
-}
+} 
