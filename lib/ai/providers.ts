@@ -25,10 +25,9 @@ export const myProvider = isTestEnvironment
       languageModels: {
         'chat-model': openai('gpt-4.1-2025-04-14'),
         'chat-model-reasoning': wrapLanguageModel({
-          model: openai('gpt-4.1-2025-04-14'),
+          model: openai('o4-mini-2025-04-16'),
           middleware: extractReasoningMiddleware({
-            tagName: 'think',
-            startWithReasoning: true,
+            reasoningEffort: 'medium',
             separator: '\n\n',
           }),
         }),
@@ -38,4 +37,4 @@ export const myProvider = isTestEnvironment
       imageModels: {
         'small-model': openai.image('gpt-image-1'),
       },
-    });
+    });t
