@@ -14,9 +14,6 @@ importers:
       '@ai-sdk/react':
         specifier: ^1.2.11
         version: 1.2.11(react@19.0.0-rc-45804af1-20241021)(zod@3.24.2)
-      '@ai-sdk/xai':
-        specifier: ^1.2.15
-        version: 1.2.15(zod@3.24.2)
       '@codemirror/lang-javascript':
         specifier: ^6.2.2
         version: 6.2.3
