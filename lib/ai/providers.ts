@@ -28,7 +28,7 @@ export const myProvider = isTestEnvironment
           model: openai('gpt-4.1-2025-04-14'),
           middleware: extractReasoningMiddleware({
             tagName: 'think',
-            startWithReasoning: false,
+            startWithReasoning: true,
             separator: '\n\n',
           }),
         }),
