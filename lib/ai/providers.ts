@@ -26,12 +26,12 @@ export const myProvider = isTestEnvironment
         'chat-model': openai('gpt-4.1'),
         'chat-model-reasoning': wrapLanguageModel({
           model: openai('gpt-4.1', {
-            systemPrompt: "Primeiro, pense sobre a resposta usando tags <think></think>. Em seguida, forneça sua resposta final fora dessas tags.",
+            temperature: 0.3,
           }),
           middleware: extractReasoningMiddleware({
             tagName: 'think',
-            startWithReasoning: false, // Mudamos para false para não forçar tudo como raciocínio
-            separator: '\n\n', // Adicionar separação clara entre pensamento e resposta
+            startWithReasoning: false,
+            separator: '\n\n',
           }),
         }),
         'title-model': openai('gpt-4.1-mini'),
