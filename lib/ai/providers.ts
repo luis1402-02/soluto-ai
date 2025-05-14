@@ -25,17 +25,10 @@ export const myProvider = isTestEnvironment
       languageModels: {
         'chat-model': openai('gpt-4.1-2025-04-14'),
         'chat-model-reasoning': wrapLanguageModel({
-          model: openai('o4-mini-2025-04-16', {
-            providerOptions: {
-              openai: {
-                // Configuração específica para modelos de raciocínio O4-mini
-                reasoningEffort: 'high', // Opções: 'low', 'medium', 'high'
-              }
-            }
-          }),
+          model: openai('gpt-4.1-2025-04-14'), // Use um modelo compatível 
           middleware: extractReasoningMiddleware({ 
             tagName: 'think',
-            startWithReasoning: true // Importante para o modelo o4-mini
+            startWithReasoning: false // Ajustado para compatibilidade
           }),
         }),
         'title-model': openai('gpt-4.1-mini-2025-04-14'),
