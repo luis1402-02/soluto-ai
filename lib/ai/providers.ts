@@ -2,6 +2,7 @@ import {
   customProvider,
   extractReasoningMiddleware,
   wrapLanguageModel,
+  type LanguageModelV1StreamParams,
 } from 'ai';
 import { openai } from '@ai-sdk/openai';
 import { isTestEnvironment } from '../constants';
@@ -14,7 +15,7 @@ import {
 
 // Middleware personalizado para forçar o modelo a mostrar seu raciocínio
 const forceReasoningMiddleware = () => {
-  return (params) => {
+  return (params: LanguageModelV1StreamParams) => {
     // Encontra e modifica a mensagem do sistema para incluir instruções de raciocínio
     const messages = params.messages.map(msg => {
       if (msg.role === 'system') {
