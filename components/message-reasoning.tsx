@@ -7,12 +7,12 @@ import { Markdown } from './markdown';
 
 interface MessageReasoningProps {
   isLoading: boolean;
-  reasoning: string;
+  reasoning: string | undefined; // Modificado para aceitar undefined
 }
 
 export function MessageReasoning({
   isLoading,
-  reasoning,
+  reasoning = '', // Valor padrão adicionado
 }: MessageReasoningProps) {
   const [isExpanded, setIsExpanded] = useState(true);
 
