@@ -25,10 +25,11 @@ export const myProvider = isTestEnvironment
       languageModels: {
         'chat-model': openai('gpt-4.1-2025-04-14'),
         'chat-model-reasoning': wrapLanguageModel({
-          model: openai('o3-2025-04-16', {
-            reasoningEffort: 'high', // Defina como 'high' para raciocínio mais detalhado
+          model: openai('o4-mini-2025-04-16', {
+            reasoningEffort: 'high',
+            summary: 'auto'
           }),
-          middleware: extractReasoningMiddleware({ tagName: 'think' }),
+          include: ['reasoning.summary']
         }),
         'title-model': openai('gpt-4.1-mini-2025-04-14'),
         'artifact-model': openai('gpt-4.1-2025-04-14'),
