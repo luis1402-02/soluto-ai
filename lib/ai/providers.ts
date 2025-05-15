@@ -12,20 +12,15 @@ import {
   titleModel,
 } from './models.test';
 
-// Middleware personalizado para induzir o modelo a mostrar seu raciocínio
-const reasoningPromptMiddleware = () => {
+// Middleware personalizado para forçar o modelo a mostrar seu raciocínio
+const forceReasoningMiddleware = () => {
   return (params) => {
-    // Modifica as mensagens do sistema para solicitar raciocínio explícito
+    // Encontra e modifica a mensagem do sistema para incluir instruções de raciocínio
     const messages = params.messages.map(msg => {
       if (msg.role === 'system') {
         return {
           ...msg,
-          content: `${msg.content}\n\nIMPORTANTE: Ao responder, SEMPRE primeiro pense passo a passo usando a seguinte estrutura:
-          <thinking>
-          [Seu raciocínio detalhado aqui, explorando todas as possibilidades e explicando seu processo de pensamento]
-          </thinking>
-          
-          Depois, forneça sua resposta final. Este formato é obrigatório para TODAS as respostas.`
+          content: `${msg.content}\n\nIMPORTANTE: Antes de responder qualquer pergunta, pense passo a passo através do problema e mostre seu raciocínio detalhado usando a tag <thinking>. Analise cuidadosamente a questão, considere diferentes abordagens, e avalie as possíveis soluções. Após seu raciocínio completo, então forneça sua resposta final.</thinking>`
         };
       }
       return msg;
@@ -49,28 +44,29 @@ export const myProvider = isTestEnvironment
     })
   : customProvider({
       languageModels: {
-        // Modelo padrão - GPT-4o
+        // Modelo padrão de chat - GPT-4.1
         'chat-model': openai('gpt-4.1-2025-04-14'),
         
-        // Modelo de raciocínio com middleware personalizado
+        // Modelo com raciocínio - GPT-4.1 com middleware para extrair raciocínio
         'chat-model-reasoning': wrapLanguageModel({
           model: openai('gpt-4.1-2025-04-14', {
-            temperature: 0.2, // Temperatura baixa para raciocínio mais determinístico
+            temperature: 0.2, // Temperatura baixa para respostas mais consistentes
           }),
           middleware: [
-            // Primeiro, injeta a instrução para mostrar o raciocínio
-            reasoningPromptMiddleware(),
-            // Depois, extrai o raciocínio das tags
+            // Primeiro, injetamos as instruções para exibir o raciocínio
+            forceReasoningMiddleware(),
+            // Depois, extraímos o raciocínio das tags <thinking>
             extractReasoningMiddleware({ tagName: 'thinking' })
-          ],
+          ]
         }),
         
-        // Modelos auxiliares
+        // Modelos para tarefas auxiliares - usando o mini para eficiência
         'title-model': openai('gpt-4.1-mini-2025-04-14'),
-        'artifact-model': openai('gpt-4.1-2025-04-14'),
+        'artifact-model': openai('gpt-4.1-mini-2025-04-14'),
       },
       
+      // Modelo para geração de imagens
       imageModels: {
-        'small-model': openai.image('gpt-image-1')
+        'small-model': openai.image('gpt-image-1'),
       },
     });
