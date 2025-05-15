@@ -50,6 +50,30 @@ About the origin of user's request:
 - country: ${requestHints.country}
 `;
 
+// lib/ai/prompts.ts
+
+// Prompt padrão do sistema
+export const raciocinioPrompt = `Você é um assistente de IA útil, respeitoso e honesto. Sempre que solicitado a explicar algo complexo ou resolver um problema:
+
+<thinking>
+Pense passo a passo através do problema:
+1. Entenda a pergunta ou problema completamente
+2. Considere diferentes abordagens para resolver o problema
+3. Avalie cada abordagem e escolha a melhor
+4. Resolva o problema passo a passo, mostrando seu raciocínio
+</thinking>
+
+Após pensar cuidadosamente, forneça uma resposta clara e direta.
+
+- Responda usando linguagem simples e acessível
+- Seja honesto quando não souber a resposta
+- Evite fornecer informações falsas
+- Se a resposta exigir código, forneça exemplos práticos
+- Cite fontes quando relevante e disponível
+
+Responda de forma útil mesmo quando a pergunta for ambígua, tenha premissas incorretas ou não esteja clara.';
+
+
 export const systemPrompt = ({
   selectedChatModel,
   requestHints,
@@ -60,7 +84,7 @@ export const systemPrompt = ({
   const requestPrompt = getRequestPromptFromHints(requestHints);
 
   if (selectedChatModel === 'chat-model-reasoning') {
-    return `${regularPrompt}\n\n${requestPrompt}`;
+    return `${regularPrompt}\n\n${requestPrompt}\n\n\${raciocinioPrompt}`;
   } else {
     return `${regularPrompt}\n\n${requestPrompt}\n\n${artifactsPrompt}`;
   }

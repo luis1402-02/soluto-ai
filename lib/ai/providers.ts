@@ -1,9 +1,4 @@
-import {
-  customProvider,
-  extractReasoningMiddleware,
-  wrapLanguageModel,
-  type LanguageModelV1StreamParams,
-} from 'ai';
+import { customProvider, extractReasoningMiddleware, wrapLanguageModel } from 'ai';
 import { openai } from '@ai-sdk/openai';
 import { isTestEnvironment } from '../constants';
 import {
@@ -13,27 +8,7 @@ import {
   titleModel,
 } from './models.test';
 
-// Middleware personalizado para forçar o modelo a mostrar seu raciocínio
-const forceReasoningMiddleware = () => {
-  return (params: LanguageModelV1StreamParams) => {
-    // Encontra e modifica a mensagem do sistema para incluir instruções de raciocínio
-    const messages = params.messages.map(msg => {
-      if (msg.role === 'system') {
-        return {
-          ...msg,
-          content: `${msg.content}\n\nIMPORTANTE: Antes de responder qualquer pergunta, pense passo a passo através do problema e mostre seu raciocínio detalhado usando a tag <thinking>. Analise cuidadosamente a questão, considere diferentes abordagens, e avalie as possíveis soluções. Após seu raciocínio completo, então forneça sua resposta final.</thinking>`
-        };
-      }
-      return msg;
-    });
-    
-    return {
-      ...params,
-      messages
-    };
-  };
-};
-
+// Configuração simplificada para máxima compatibilidade
 export const myProvider = isTestEnvironment
   ? customProvider({
       languageModels: {
@@ -45,28 +20,24 @@ export const myProvider = isTestEnvironment
     })
   : customProvider({
       languageModels: {
-        // Modelo padrão de chat - GPT-4.1
+        // Modelo principal
         'chat-model': openai('gpt-4.1-2025-04-14'),
         
-        // Modelo com raciocínio - GPT-4.1 com middleware para extrair raciocínio
+        // Modelo com raciocínio usando apenas o middleware padrão
         'chat-model-reasoning': wrapLanguageModel({
-          model: openai('gpt-4.1-2025-04-14', {
-            temperature: 0.2, // Temperatura baixa para respostas mais consistentes
-          }),
-          middleware: [
-            // Primeiro, injetamos as instruções para exibir o raciocínio
-            forceReasoningMiddleware(),
-            // Depois, extraímos o raciocínio das tags <thinking>
-            extractReasoningMiddleware({ tagName: 'thinking' })
-          ]
+          model: openai('gpt-4.1-2025-04-14'),
+          middleware: extractReasoningMiddleware({ 
+            tagName: 'thinking',
+            // Evite propriedades opcionais que podem causar problemas de tipo
+          })
         }),
         
-        // Modelos para tarefas auxiliares - usando o mini para eficiência
+        // Modelos auxiliares
         'title-model': openai('gpt-4.1-mini-2025-04-14'),
         'artifact-model': openai('gpt-4.1-mini-2025-04-14'),
       },
       
-      // Modelo para geração de imagens
+      // Modelo de imagem
       imageModels: {
         'small-model': openai.image('gpt-image-1'),
       },
