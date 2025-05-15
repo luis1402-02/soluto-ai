@@ -41,6 +41,9 @@ const PurePreviewMessage = ({
 }) => {
   const [mode, setMode] = useState<'view' | 'edit'>('view');
 
+  // Verifica se há raciocínio diretamente na mensagem (compatibilidade com OpenAI)
+  const hasDirectReasoning = message.reasoning && message.role === 'assistant';
+
   return (
     <AnimatePresence>
       <motion.div
@@ -72,6 +75,15 @@ const PurePreviewMessage = ({
               'min-h-96': message.role === 'assistant' && requiresScrollPadding,
             })}
           >
+            {/* Exibir raciocínio direto da propriedade message.reasoning para compatibilidade com OpenAI */}
+            {hasDirectReasoning && (
+              <MessageReasoning
+                key={`reasoning-${message.id}`}
+                isLoading={isLoading}
+                reasoning={message.reasoning}
+              />
+            )}
+
             {message.experimental_attachments &&
               message.experimental_attachments.length > 0 && (
                 <div
@@ -246,6 +258,8 @@ export const PreviewMessage = memo(
       return false;
     if (!equal(prevProps.message.parts, nextProps.message.parts)) return false;
     if (!equal(prevProps.vote, nextProps.vote)) return false;
+    // Adicione verificação para propriedade reasoning
+    if (prevProps.message.reasoning !== nextProps.message.reasoning) return false;
 
     return true;
   },
@@ -276,7 +290,7 @@ export const ThinkingMessage = () => {
 
         <div className="flex flex-col gap-2 w-full">
           <div className="flex flex-col gap-4 text-muted-foreground">
-            Hmm...
+            Pensando...
           </div>
         </div>
       </div>

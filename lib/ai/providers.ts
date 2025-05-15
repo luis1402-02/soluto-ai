@@ -25,11 +25,10 @@ export const myProvider = isTestEnvironment
       languageModels: {
         'chat-model': openai('gpt-4.1-2025-04-14'),
         'chat-model-reasoning': wrapLanguageModel({
-          model: openai('o4-mini-2025-04-16'),
-          middleware: extractReasoningMiddleware({
-            reasoningEffort: 'medium',
-            separator: '\n\n',
+          model: openai('o4-mini-2025-04-16', {
+            reasoningEffort: 'high', // Defina como 'high' para raciocínio mais detalhado
           }),
+          middleware: extractReasoningMiddleware({ tagName: 'think' }),
         }),
         'title-model': openai('gpt-4.1-mini-2025-04-14'),
         'artifact-model': openai('gpt-4.1-2025-04-14'),
@@ -37,4 +36,4 @@ export const myProvider = isTestEnvironment
       imageModels: {
         'small-model': openai.image('gpt-image-1'),
       },
-    });t
+    });
