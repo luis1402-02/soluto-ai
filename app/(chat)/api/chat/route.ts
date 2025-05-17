@@ -253,10 +253,19 @@ export async function POST(request: Request) {
 
             // Run the swarm orchestration
             console.log('Starting swarm orchestration for chat', id);
+            // Converta Message[] para UIMessage[] para satisfazer a tipagem
+            const uiMessages = messages.map(msg => ({
+              ...msg,
+              parts: msg.parts || [{ type: 'text', text: typeof msg.content === 'string' ? msg.content : JSON.stringify(msg.content) }],
+            }));
+            
+            // Cast das ferramentas para o tipo esperado pelo orquestrador
+            const toolsForSwarm: Record<string, any> = toolsWithStream;
+            
             const swarmResult = await runSwarmOrchestration({
-              messages,
+              messages: uiMessages,
               requestHints,
-              tools: toolsWithStream
+              tools: toolsForSwarm
             });
 
             // Create the final message with reasoning
