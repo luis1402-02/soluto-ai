@@ -35,19 +35,13 @@ import {
 import { after } from 'next/server';
 import type { Chat } from '@/lib/db/schema';
 import { differenceInSeconds } from 'date-fns';
-import { createSwarmMessage, runSwarmOrchestration } from '@/lib/ai/swarm/orchestrator';
+import { runSwarmOrchestration, createSwarmMessage } from '@/lib/ai/swarm/orchestrator';
 
 export const maxDuration = 60;
 
-// Utility function to clean up when the stream is finished
-function cleanupStreamContext(streamContext: ResumableStreamContext | null): void {
-  if (streamContext) {
-    // Free resources or do cleanup
-    console.log('Stream context cleanup');
-  }
-}
+// Track active streams for proper cleanup
+const activeStreams = new Set<string>();
 
-// Singleton pattern with cleanup capability
 let globalStreamContext: ResumableStreamContext | null = null;
 
 function getStreamContext() {
@@ -69,78 +63,6 @@ function getStreamContext() {
 
   return globalStreamContext;
 }
-
-// Utility to stream text chunks while preserving formatting
-function streamFormattedText(dataStream: any, text: string, delayMs = 5): Promise<void> {
-  return new Promise<void>(async (resolve) => {
-    if (!text) {
-      resolve();
-      return;
-    }
-
-    // Preserve markdown and formatting in the streaming
-    const preserveFormatting = (text: string): Array<string | {isMarker: boolean, text: string}> => {
-      // Split on markers that should be preserved
-      const markers = [
-        '```', '`', '#', '##', '###', '####', '#####', '**', '__', '*', '_',
-        '\n', '- ', '1. ', '> '
-      ];
-      
-      let parts: Array<string | {isMarker: boolean, text: string}> = [text];
-      
-      // For each marker, split all parts and preserve the marker
-      markers.forEach(marker => {
-        let newParts: Array<string | {isMarker: boolean, text: string}> = [];
-        parts.forEach(part => {
-          if (typeof part !== 'string') {
-            newParts.push(part);
-            return;
-          }
-          
-          const split = part.split(marker);
-          for (let i = 0; i < split.length; i++) {
-            if (i > 0) {
-              // Keep the marker as a separate chunk
-              newParts.push({ isMarker: true, text: marker });
-            }
-            if (split[i]) {
-              newParts.push(split[i]);
-            }
-          }
-        });
-        parts = newParts;
-      });
-      
-      return parts;
-    };
-
-    const chunks = preserveFormatting(text);
-    
-    for (const chunk of chunks) {
-      // If it's a marker, send it immediately without delay
-      if (typeof chunk === 'object' && chunk.isMarker) {
-        dataStream.writeData({ type: 'text', value: chunk.text });
-        // Very brief delay so markers don't pile up
-        await new Promise(r => setTimeout(r, 1));
-      } 
-      // For normal text, stream word by word
-      else if (typeof chunk === 'string') {
-        const words = chunk.split(/(\s+)/);
-        for (const word of words) {
-          dataStream.writeData({ type: 'text', value: word });
-          if (word.trim().length > 0) {
-            await new Promise(r => setTimeout(r, delayMs));
-          }
-        }
-      }
-    }
-    
-    resolve();
-  });
-}
-
-// Keep track of active streams for cleanup
-const activeStreams = new Set<string>();
 
 export async function POST(request: Request) {
   let requestBody: PostRequestBody;
@@ -199,7 +121,6 @@ export async function POST(request: Request) {
 
     const previousMessages = await getMessagesByChatId({ id });
 
-    // Convert DB messages to UI messages format
     const messages = appendClientMessage({
       // @ts-expect-error: todo add type conversion from DBMessage[] to UIMessage[]
       messages: previousMessages,
@@ -253,10 +174,19 @@ export async function POST(request: Request) {
 
             // Run the swarm orchestration
             console.log('Starting swarm orchestration for chat', id);
+            // Converta Message[] para UIMessage[] para satisfazer a tipagem
+            const uiMessages = messages.map(msg => ({
+              ...msg,
+              parts: msg.parts || [{ type: 'text', text: typeof msg.content === 'string' ? msg.content : JSON.stringify(msg.content) }],
+            }));
+            
+            // Cast das ferramentas para o tipo esperado pelo orquestrador
+            const toolsForSwarm: Record<string, any> = toolsWithStream;
+            
             const swarmResult = await runSwarmOrchestration({
-              messages,
+              messages: uiMessages,
               requestHints,
-              tools: toolsWithStream
+              tools: toolsForSwarm
             });
 
             // Create the final message with reasoning
@@ -268,11 +198,15 @@ export async function POST(request: Request) {
               id: assistantId,
               role: 'assistant',
               content: fullContent,
+              createdAt: new Date(),
             };
 
-            // Stream the content to the user with proper formatting
-            console.log('Streaming formatted swarm response');
-            await streamFormattedText(dataStream, swarmResult.responseText);
+            // Stream the content to the client
+            console.log('Streaming swarm result');
+            dataStream.writeData({
+              type: 'append-message',
+              message: JSON.stringify(responseMessage),
+            });
 
             // Save the message to the database
             await saveMessages({
@@ -281,35 +215,28 @@ export async function POST(request: Request) {
                   id: assistantId,
                   chatId: id,
                   role: 'assistant',
-                  parts: [fullContent],
-                  attachments: [],
+                  content: fullContent,
                   createdAt: new Date(),
                 },
               ],
             });
-            
-            // Add reasoning indication to stream data
-            dataStream.writeData({
-              type: 'reasoning',
-              value: swarmResult.reasoningMarkdown
-            });
-            
-            console.log('Swarm response complete for chat', id);
+
+            console.log('Swarm processing completed for', id);
           } catch (error) {
-            console.error('Error in swarm orchestration:', error);
+            console.error('Error in swarm processing:', error);
             dataStream.writeData({
-              type: 'text',
-              value: 'Desculpe, ocorreu um erro ao processar sua solicitação. Por favor, tente novamente.'
+              type: 'error',
+              error: 'Failed to process your request. Please try again.',
             });
           } finally {
-            // Remove from tracking
+            // Clean up
             activeStreams.delete(streamId);
           }
         },
         onError: (error) => {
-          console.error('Stream error:', error);
+          console.error('Data stream error:', error);
           activeStreams.delete(streamId);
-          return 'Oops, ocorreu um erro inesperado. Por favor, tente novamente.';
+          return 'An error occurred while processing your request.';
         },
       });
 
@@ -323,86 +250,64 @@ export async function POST(request: Request) {
         return new Response(stream);
       }
     } else {
-      // Simple mode (original implementation)
-      const stream = createDataStream({
-        execute: (dataStream) => {
-          const result = streamText({
-            model: myProvider.languageModel(selectedChatModel),
-            system: systemPrompt({ selectedChatModel, requestHints }),
-            messages,
-            maxSteps: 5,
-            experimental_activeTools: [
-              'getWeather',
-              'createDocument',
-              'updateDocument', 
-              'requestSuggestions',
-            ],
-            experimental_transform: smoothStream({ chunking: 'word' }),
-            experimental_generateMessageId: generateUUID,
-            tools: {
-              getWeather,
-              createDocument: createDocument({ session, dataStream }),
-              updateDocument: updateDocument({ session, dataStream }),
-              requestSuggestions: requestSuggestions({
-                session,
-                dataStream,
-              }),
-            },
-            onFinish: async ({ response }) => {
-              try {
-                if (session.user?.id) {
-                  const assistantId = getTrailingMessageId({
-                    messages: response.messages.filter(
-                      (message) => message.role === 'assistant',
-                    ),
-                  });
-
-                  if (!assistantId) {
-                    throw new Error('No assistant message found!');
-                  }
-
-                  const [, assistantMessage] = appendResponseMessages({
-                    messages: [message],
-                    responseMessages: response.messages,
-                  });
-
-                  await saveMessages({
-                    messages: [
-                      {
-                        id: assistantId,
-                        chatId: id,
-                        role: assistantMessage.role,
-                        parts: assistantMessage.parts,
-                        attachments:
-                          assistantMessage.experimental_attachments ?? [],
-                        createdAt: new Date(),
-                      },
-                    ],
-                  });
-                }
-              } catch (error) {
-                console.error('Failed to save chat:', error);
-              } finally {
-                // Remove from tracking
-                activeStreams.delete(streamId);
-              }
-            },
-            experimental_telemetry: {
-              isEnabled: isProductionEnvironment,
-              functionId: 'stream-text',
-            },
-          });
-
-          result.consumeStream();
-
-          result.mergeIntoDataStream(dataStream, {
-            sendReasoning: true,
-          });
+      // Simple mode implementation (original code)
+      const stream = streamText({
+        model: myProvider.languageModel(selectedChatModel),
+        system: systemPrompt({ selectedChatModel, requestHints }),
+        messages,
+        maxSteps: 5,
+        experimental_activeTools: ['getWeather', 'createDocument', 'updateDocument', 'requestSuggestions'],
+        experimental_transform: smoothStream({ chunking: 'word' }),
+        experimental_generateMessageId: generateUUID,
+        tools: {
+          getWeather,
+          createDocument: createDocument({ session }),
+          updateDocument: updateDocument({ session }),
+          requestSuggestions: requestSuggestions({
+            session,
+          }),
         },
-        onError: (error) => {
-          console.error('Stream error:', error);
+        onFinish: async ({ response }) => {
           activeStreams.delete(streamId);
-          return 'Oops, ocorreu um erro inesperado. Por favor, tente novamente.';
+          
+          if (session.user?.id) {
+            try {
+              const assistantId = getTrailingMessageId({
+                messages: response.messages.filter(
+                  (message) => message.role === 'assistant',
+                ),
+              });
+
+              if (!assistantId) {
+                throw new Error('No assistant message found!');
+              }
+
+              const [, assistantMessage] = appendResponseMessages({
+                messages: [message],
+                responseMessages: response.messages,
+              });
+
+              await saveMessages({
+                messages: [
+                  {
+                    id: assistantId,
+                    chatId: id,
+                    role: assistantMessage.role,
+                    parts: assistantMessage.parts,
+                    attachments:
+                      assistantMessage.experimental_attachments ?? [],
+                    createdAt: new Date(),
+                  },
+                ],
+              });
+            } catch (error) {
+              console.error('Failed to save chat', error);
+            }
+          }
+        },
+        experimental_telemetry: {
+          isEnabled: isProductionEnvironment,
+          functionId: 'stream-text',
         },
       });
 
@@ -417,7 +322,7 @@ export async function POST(request: Request) {
       }
     }
   } catch (error) {
-    console.error('Request error:', error);
+    console.error('Error in chat route:', error);
     return new Response('An error occurred while processing your request!', {
       status: 500,
     });
