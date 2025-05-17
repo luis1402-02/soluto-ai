@@ -180,9 +180,18 @@ export async function POST(request: Request) {
               parts: msg.parts || [{ type: 'text', text: typeof msg.content === 'string' ? msg.content : JSON.stringify(msg.content) }],
             }));
             
+<<<<<<< HEAD
             // Cast das ferramentas para o tipo esperado pelo orquestrador
             const toolsForSwarm: Record<string, any> = toolsWithStream;
             
+=======
+<<<<<<< HEAD
+            // Cast das ferramentas para o tipo esperado pelo orquestrador
+            const toolsForSwarm: Record<string, any> = toolsWithStream;
+            
+=======
+>>>>>>> e5dc205079cb0fc279afc281137673d7e3f58e7e
+>>>>>>> 4b8dd16880a7e4c42aa2f9ced452dfeb87ec011f
             const swarmResult = await runSwarmOrchestration({
               messages: uiMessages,
               requestHints,
