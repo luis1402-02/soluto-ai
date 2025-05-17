@@ -9,7 +9,7 @@ const DEFAULT_AGENT_TIMEOUT = 20000;
 interface SwarmInput {
   messages: UIMessage[];
   requestHints: RequestHints;
-  tools?: Record<string, Function>;
+  tools?: Record<string, any>; // Aceita qualquer tipo de ferramenta
 }
 
 interface AgentOutput {
